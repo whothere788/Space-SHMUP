@@ -4,15 +4,20 @@ using UnityEngine;
 
 public class Hero : MonoBehaviour {
     static public Hero S;
+
     [Header("Set in Inspector")]
     public float speed = 30;
     public float rollMult = -45;
     public float pitchMult = 30;
-    [Header("Set Dynamically")]
-    public float shieldLevel = 1;
+    public float gameRestartDelay = 2r;
 
-    void Awake()
-    {
+    [Header("Set Dynamically")]
+    [SerializeField]
+    private float _shieldLevel = 1;
+
+    private GameObject lastTriggeredGo = null;
+    
+    void Awake(){
         if(S == null)
         {
             S = this;
@@ -42,11 +47,40 @@ public class Hero : MonoBehaviour {
         transform.rotation = Quaternion.Euler(yAxis * pitchMult, xAxis * rollMult, 0);
 		
 	}
+
     void OnTriggerEnter(Collider other)
     {
         Transform rootT = other.gameObject.transform.root;
         GameObject go = rootT.gameObject;
-        print("Triggered: "+ go.name);
-        
+        // print("Triggered: "+ go.name);
+
+        if (go == lastTriggeredGo)
+        {
+            return;
+        }
+        lastTriggeredGo = go;
+
+        if (go.tag == "Enemy")
+        {
+            _shieldLevel--;
+            Destroy(go);
+        }else{
+            print("Triggered by non-Enemy: " + go.name);
+        }
     }
+
+        public float shieldLevel{
+        get{
+            return(_shieldLevel);
+        }
+        set{
+            _shieldLevel = Mathf.Min(value, 4);
+            if (value < 0){
+                Destroy(this.gameObject);
+                Main.S.DelayedRestart(gameRestartDelay);
+            }
+            
+        }
+    } 
 }
+

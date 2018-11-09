@@ -36,7 +36,10 @@ public class Main : MonoBehaviour {
 
         Invoke("SpawnEnemy", 1f / enemySpawnPerSecond);
     }
-
+    public void DelayedRestart(float delay)
+    {
+        Invoke("Restart", delay);
+    }
 
     // Use this for initialization
     void Start () {
